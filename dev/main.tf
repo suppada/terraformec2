@@ -5,6 +5,14 @@ provider "aws" {
 
 
 // EC2 Instance Resource for Module
+
+/*
+ resource "aws_volume_attachment" "ebs_att" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.ec2_instance.id
+  instance_id = join("", aws_instance.ec2_instance.*.id)
+}
+*/
 resource "aws_instance" "ec2_instance" {
   count                  = var.ec2_count
   instance_type          = var.instance_type
@@ -14,6 +22,19 @@ resource "aws_instance" "ec2_instance" {
   subnet_id              = var.subnet_id
   user_data              = file(var.user_data)
 
+  root_block_device {
+    volume_type           = var.volume_type
+    volume_size           = var.volume_size
+    iops                  = var.iops
+    delete_on_termination = var.termination
+
+    tags = {
+      Name        = var.instance_name
+      Environment = "Test"
+      Owner       = "Suresh"
+      Project     = "Test"
+    }
+  }
 
   tags = {
     Name        = var.instance_name
@@ -22,6 +43,20 @@ resource "aws_instance" "ec2_instance" {
     Project     = "Test"
   }
 }
+
+/*
+resource "aws_ebs_volume" "ec2_instance" {
+  availability_zone = "us-east-2c"
+  size              = 30
+
+  tags = {
+    Name        = var.instance_name
+    Environment = "Test"
+    Owner       = "Suresh"
+    Project     = "Test"
+  }
+}
+*/
 
 #--------- Security Groups -------------#
 
@@ -54,7 +89,7 @@ resource "aws_security_group" "instance" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-#Custom TCP
+  #Custom TCP
   ingress {
     from_port   = 8081
     to_port     = 8081
@@ -62,7 +97,7 @@ resource "aws_security_group" "instance" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-#Custom TCP For mysql database
+  #Custom TCP For mysql database
   ingress {
     from_port   = 3306
     to_port     = 3306

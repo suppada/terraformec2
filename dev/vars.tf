@@ -5,3 +5,7 @@ variable "instance_name" {}
 variable "user_data" {}
 variable "aws_region" {}
 variable "subnet_id" {}
+variable "volume_type" {}
+variable "volume_size" {}
+variable "iops" {}
+variable "termination" {}
